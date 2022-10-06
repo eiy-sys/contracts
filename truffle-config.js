@@ -88,7 +88,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.5.2', //changed from o.5.17 to 0.8.17
+      version: '0.8.17', //changed from o.5.17 to 0.8.17
       docker: true,
       parser: 'solcjs',
       settings: {
