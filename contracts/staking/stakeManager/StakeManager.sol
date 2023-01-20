@@ -67,12 +67,13 @@ contract StakeManager is
         require(validators[validatorId].contractAddress == msg.sender, "Invalid contract address");
     }
 
-    constructor() public GovernanceLockable(address(0x0)) {}
+    constructor() public GovernanceLockable(address(0x0)) initializer {}
 
     function initialize(
         address _registry,
         address _rootchain,
         address _token,
+        address _doubleRewardToken,
         address _NFTContract,
         address _stakingLogger,
         address _validatorShareFactory,
@@ -86,6 +87,7 @@ contract StakeManager is
         registry = _registry;
         rootChain = _rootchain;
         token = IERC20(_token);
+        doubleRewardToken = IERC20(_doubleRewardToken);
         NFTContract = StakingNFT(_NFTContract);
         logger = StakingInfo(_stakingLogger);
         validatorShareFactory = ValidatorShareFactory(_validatorShareFactory);
@@ -94,7 +96,7 @@ contract StakeManager is
         WITHDRAWAL_DELAY = (2**13); // unit: epoch
         currentEpoch = 1;
         dynasty = 886; // unit: epoch 50 days
-        CHECKPOINT_REWARD = 505 * (10**18); // update via governance
+        CHECKPOINT_REWARD = 20188 * (10**18); // update via governance
         minDeposit = (10**18); // in ERC20 token
         minHeimdallFee = (10**18); // in ERC20 token
         checkPointBlockInterval = 1024;
@@ -105,6 +107,7 @@ contract StakeManager is
         auctionPeriod = (2**13) / 4; // 1 week in epochs
         proposerBonus = 10; // 10 % of total rewards
         delegationEnabled = true;
+        doubleRewards = false;
     }
 
     function isOwner() public view returns (bool) {
@@ -208,6 +211,11 @@ contract StakeManager is
         token = IERC20(_token);
     }
 
+    function setDoubleRewardToken(address _token) public onlyGovernance {
+        require(_token != address(0x0), ‘Invalid Address’);
+        doubleRewardToken = IERC20(_token);
+    }
+
     /**
         @dev Change the number of validators required to allow a passed header root
      */
@@ -273,9 +281,13 @@ contract StakeManager is
         require(newDynasty > 0);
         logger.logDynastyValueChange(newDynasty, dynasty);
         dynasty = newDynasty;
-        WITHDRAWAL_DELAY = newDynasty;
         auctionPeriod = newDynasty.div(4);
         replacementCoolDown = currentEpoch.add(auctionPeriod);
+    }
+    function updateWithdrawlDelay(uint256 newDelay) public onlyGovernance {
+        require(newDelay > 0);
+        logger.logWithdrawlDelayValueChange(newDelay, WITHDRAWAL_DELAY);
+        WITHDRAWAL_DELAY = newDelay;
     }
 
     // Housekeeping function. @todo remove later
@@ -535,7 +547,14 @@ contract StakeManager is
             require(delegationEnabled, "Delegation is disabled");
         }
 
-        updateTimeline(amount, 0, 0);
+        uint256 deactivationEpoch = validators[validatorId].deactivationEpoch;
+
+        if (deactivationEpoch == 0) { // modify timeline only if validator didn't unstake
+            updateTimeline(amount, 0, 0);
+        } else if (deactivationEpoch > currentEpoch) { // validator just unstaked, need to wait till next checkpoint
+            revert("unstaking");
+        }
+        
 
         if (amount >= 0) {
             increaseValidatorDelegatedAmount(validatorId, uint256(amount));
@@ -560,11 +579,16 @@ contract StakeManager is
         address currentSigner = validators[validatorId].signer;
         // update signer event
         logger.logSignerChange(validatorId, currentSigner, signer, signerPubkey);
+        
+        if (validators[validatorId].deactivationEpoch == 0) { 
+            // didn't unstake, swap signer in the list
+            _removeSigner(currentSigner);
+            _insertSigner(signer);
+        }
 
         signerToValidator[currentSigner] = INCORRECT_VALIDATOR_ID;
         signerToValidator[signer] = validatorId;
         validators[validatorId].signer = signer;
-        _updateSigner(currentSigner, signer);
 
         // reset update time to current time
         latestSignerUpdateEpoch[validatorId] = _currentEpoch;
@@ -1146,10 +1170,18 @@ contract StakeManager is
         validators[validatorId].initialRewardPerStake = rewardPerStake;
         _transferToken(validatorUser, reward);
         logger.logClaimRewards(validatorId, reward, totalRewardsLiquidated);
+        if(doubleRewards){
+            _transferDoubleReward(validatorUser, reward);
+            logger.logDoubleRewards(validatorId, reward, totalRewardsLiquidated);
+        }
     }
 
     function _transferToken(address destination, uint256 amount) private {
         require(token.transfer(destination, amount), "transfer failed");
+    }
+
+    function _transferDoubleReward(address destination, uint256 amount) private {
+        require(doubleRewardToken.transfer(destination, amount), "transfer failed");
     }
 
     function _transferTokenFrom(
@@ -1193,11 +1225,6 @@ contract StakeManager is
         if (i != lastIndex) {
             signers[i] = newSigner;
         }
-    }
-
-    function _updateSigner(address prevSigner, address newSigner) internal {
-        _removeSigner(prevSigner);
-        _insertSigner(newSigner);
     }
 
     function _removeSigner(address signerToDelete) internal {
