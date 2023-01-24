@@ -53,6 +53,8 @@ contract StakeManagerStorage is GovernanceLockable, RootChainable {
     uint256 internal constant INITIALIZED_AMOUNT = 1;
 
     IERC20 public token;
+    IERC20 public doubleRewardToken;
+    bool public doubleRewards;
     address public registry;
     StakingInfo public logger;
     StakingNFT public NFTContract;

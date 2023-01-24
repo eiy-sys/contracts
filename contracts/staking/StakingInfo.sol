@@ -107,6 +107,7 @@ contract StakingInfo is Ownable {
     event Slashed(uint256 indexed nonce, uint256 indexed amount);
     event ThresholdChange(uint256 newThreshold, uint256 oldThreshold);
     event DynastyValueChange(uint256 newDynasty, uint256 oldDynasty);
+    event WithdrawlDelayValueChange(uint256 newDelay, uint256 oldDelay);
     event ProposerBonusChange(
         uint256 newProposerBonus,
         uint256 oldProposerBonus
@@ -124,6 +125,11 @@ contract StakingInfo is Ownable {
         uint256 indexed newAmount
     );
     event ClaimRewards(
+        uint256 indexed validatorId,
+        uint256 indexed amount,
+        uint256 indexed totalAmount
+    );
+    event ClaimDoubleRewards(
         uint256 indexed validatorId,
         uint256 indexed amount,
         uint256 indexed totalAmount
@@ -327,6 +333,13 @@ contract StakingInfo is Ownable {
         emit DynastyValueChange(newDynasty, oldDynasty);
     }
 
+    function logWithdrawlDelayValueChange(uint256 newDelay, uint256 oldDelay)
+        public
+        onlyStakeManager
+    {
+        emit WithdrawlDelayValueChange(newDelay, oldDelay);
+    }
+
     function logProposerBonusChange(
         uint256 newProposerBonus,
         uint256 oldProposerBonus
@@ -359,6 +372,14 @@ contract StakingInfo is Ownable {
         uint256 totalAmount
     ) public onlyStakeManager {
         emit ClaimRewards(validatorId, amount, totalAmount);
+    }
+
+    function logDoubleRewards(
+        uint256 validatorId,
+        uint256 amount,
+        uint256 totalAmount
+    ) public onlyStakeManager {
+        emit ClaimDoubleRewards(validatorId, amount, totalAmount);
     }
 
     function logStartAuction(
