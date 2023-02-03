@@ -39,6 +39,7 @@ class Deployer {
     this.eventsHub = await this.deployEventsHub(this.registry.address)
     this.validatorShareFactory = await contracts.ValidatorShareFactory.new()
     this.stakeToken = await contracts.TestToken.new('Stake Token', 'ST')
+    this.rewardsToken = await contracts.TestToken.new('Rewards Token', 'RT')
     this.stakingInfo = await contracts.StakingInfo.new(this.registry.address)
     this.slashingManager = await contracts.SlashingManager.new(this.registry.address, this.stakingInfo.address, 'heimdall-P5rXwg')
     this.rootChain = await this.deployRootChain()
@@ -53,6 +54,7 @@ class Deployer {
       this.registry.address,
       this.rootChain.address,
       this.stakeToken.address,
+      this.rewardsToken.address,
       this.stakingNFT.address,
       this.stakingInfo.address,
       this.validatorShareFactory.address,
@@ -183,6 +185,7 @@ class Deployer {
     this.rootChain = await this.deployRootChain()
     this.stakingInfo = await contracts.StakingInfo.new(this.registry.address)
     this.stakeToken = await contracts.TestToken.new('Stake Token', 'STAKE')
+    this.rewardsToken = await contracts.TestToken.new('Rewards Token', 'RWRD')
     this.stakingNFT = await contracts.StakingNFT.new('Matic Validator', 'MV')
 
     let stakeManager = await contracts.StakeManagerTestable.new()
@@ -195,6 +198,7 @@ class Deployer {
       this.registry.address,
       rootChainOwner.getAddressString(),
       this.stakeToken.address,
+      this.rewardsToken.address,
       this.stakingNFT.address,
       this.stakingInfo.address,
       this.validatorShareFactory.address,
@@ -226,6 +230,7 @@ class Deployer {
       rootChain: this.rootChain,
       stakeManager: this.stakeManager,
       stakeToken: this.stakeToken,
+      rewardsToken: this.rewardsToken,
       slashingManager: this.slashingManager,
       stakingInfo: this.stakingInfo,
       governance: this.governance,

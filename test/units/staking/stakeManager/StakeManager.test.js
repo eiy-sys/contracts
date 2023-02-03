@@ -204,13 +204,20 @@ contract('StakeManager', async function(accounts) {
       await prepareForTest(4, 2).call(this)
 
       this.stakeToken = await TestToken.new('MATIC', 'MATIC')
+      this.rewardsToken = await TestToken.new('Rewards Token', 'RWRD')
 
       await this.governance.update(
         this.stakeManager.address,
         this.stakeManager.contract.methods.setStakingToken(this.stakeToken.address).encodeABI()
       )
 
+      await this.governance.update(
+        this.stakeManager.address,
+        this.stakeManager.contract.methods.setDoubleRewardToken(this.rewardsToken.address).encodeABI()
+      )
+
       await this.stakeToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
+      await this.rewardsToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
 
       this.validatorId = '1'
       this.validatorUser = wallets[0]

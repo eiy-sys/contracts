@@ -25,6 +25,7 @@ contract('DrainStakeManager', async function(accounts) {
 
       this.governance = contracts.governance
       this.stakeToken = contracts.stakeToken
+      this.rewardsToken = contracts.rewardsToken
       this.stakeManager = contracts.stakeManager
       this.proxy = contracts.stakeManagerProxy
       this.stakeManagerImpl = contracts.stakeManagerImpl
@@ -39,7 +40,12 @@ contract('DrainStakeManager', async function(accounts) {
         this.stakeManager.address,
         amount
       );
+      await this.rewardsToken.mint(
+        this.stakeManager.address,
+        amount
+      );
       (await this.stakeToken.balanceOf(this.stakeManager.address)).toString().should.be.equal(amount.toString())
+      (await this.rewardsToken.balanceOf(this.stakeManager.address)).toString().should.be.equal(amount.toString())
     })
 
     it('must lock stake manager', async function() {

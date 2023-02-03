@@ -70,4 +70,4 @@ function transformArtifact(contract, args = []) {
   return JSON.stringify(res)
 }
 
-deploy().then()
+deploy().then().catch((error) => console.log(error))
