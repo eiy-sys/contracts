@@ -303,6 +303,7 @@ module.exports = async function(deployer, network, accounts) {
           MaticToken: maticToken.address,
           MaticWeth: MaticWeth.address,
           TestToken: TestToken.address,
+          RewardsToken: testToken.address,
           RootERC721: RootERC721.address
         }
       }

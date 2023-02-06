@@ -79,6 +79,7 @@ contract('DrainStakeManager', async function(accounts) {
 
     it('must drain all funds when drained by owner (Gnosis safe)', async function() {
       const balance = await this.stakeToken.balanceOf(this.stakeManager.address)
+      const rwdBalance = await this.rewardsToken.balanceOf(this.stakeManager.address)
       const data = this.stakeManagerDrainable.contract.methods.drain(owner, balance.toString()).encodeABI()
       await execSafe(
         this.gSafe,
@@ -87,6 +88,7 @@ contract('DrainStakeManager', async function(accounts) {
         [accounts[1], accounts[2]]
       )
       assert.equal((await this.stakeToken.balanceOf(this.stakeManager.address)).toString(), '0')
+      assert.equal((await this.rewardsToken.balanceOf(this.stakeManager.address)).toString(), (rwdBalance - balance).toString())  // remaining balance should be 0
     })
 
     it('must swap back to normal implementaion', async function() {

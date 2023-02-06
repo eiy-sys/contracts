@@ -161,6 +161,7 @@ async function deploy() {
     'Registry',
     'RootChainProxy',
     'TestToken',
+    'TestToken',
     'StakingNFT',
     'StakingInfo',
     'ValidatorShareFactory',

@@ -1392,14 +1392,17 @@ contract('StakeManager', async function(accounts) {
       it('must have correct balance', async function() {
         this.validatorId = await this.stakeManager.getValidatorId(this.user)
         const beforeBalance = await this.stakeToken.balanceOf(this.user)
+        const beforeRwdBalance = await this.rewardsToken.balanceOf(this.user)
 
         this.receipt = await this.stakeManager.withdrawRewards(this.validatorId, {
           from: this.user
         })
 
         const afterBalance = await this.stakeToken.balanceOf(this.user)
+        const afterRwdBalance = await this.rewardsToken.balanceOf(this.user)
 
         assertBigNumberEquality(afterBalance, this.expectedReward.add(beforeBalance))
+        assertBigNumberEquality(afterBalance, this.expectedReward.add(beforeRwdBalance))
       })
 
       it('must emit ClaimRewards', async function() {

@@ -153,11 +153,16 @@ module.exports = async function(deployer) {
     await deployer.deploy(MaticWeth)
     await deployer.deploy(TestToken, 'MATIC', 'MATIC')
     const testToken = await TestToken.new('Test ERC20', 'TST20')
+    const rewardToken = await TestToken.new('Rewards', 'RWRD')
     await deployer.deploy(RootERC721, 'Test ERC721', 'TST721')
 
     const stakeManager = await deployer.deploy(StakeManager)
     const proxy = await deployer.deploy(StakeManagerProxy, '0x0000000000000000000000000000000000000000')
-    await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, TestToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
+    try{
+      await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, TestToken.address, rewardToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
+    }catch (error){
+      console.log(error)
+    }
 
     await deployer.deploy(SlashingManager, Registry.address, StakingInfo.address, process.env.HEIMDALL_ID)
     await deployer.deploy(ValidatorShare, Registry.address, 0/** dummy id */, StakingInfo.address, StakeManagerProxy.address)
@@ -236,6 +241,7 @@ module.exports = async function(deployer) {
           MaticWeth: MaticWeth.address,
           MaticToken: TestToken.address,
           TestToken: testToken.address,
+          RewardsToken: rewardToken.address,
           RootERC721: RootERC721.address
         }
       }
