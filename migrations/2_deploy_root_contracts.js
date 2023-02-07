@@ -49,6 +49,7 @@ const StakeManagerTest = artifacts.require('StakeManagerTest')
 const ExitNFT = artifacts.require('ExitNFT')
 const MaticWeth = artifacts.require('MaticWETH')
 const TestToken = artifacts.require('TestToken')
+const BoneToken = artifacts.require('BoneToken')
 const RootERC721 = artifacts.require('RootERC721')
 
 const StakeManagerExtension = artifacts.require('StakeManagerExtension')
@@ -176,8 +177,8 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(Registry, GovernanceProxy.address)
     await deployer.deploy(ValidatorShareFactory)
     await deployer.deploy(ValidatorShare)
-    const boneToken = await deployer.deploy(TestToken, 'BONE', 'BONE')
-    const testToken = await deployer.deploy(TestToken, 'Test ERC20', 'TEST20')
+    const boneToken = await deployer.deploy(BoneToken, 'BONE', 'BONE')
+    await deployer.deploy(TestToken, 'Test ERC20', 'TEST20')
     await deployer.deploy(RootERC721, 'Test ERC721', 'TST721')
     await deployer.deploy(StakingInfo, Registry.address)
     await deployer.deploy(StakingNFT, 'Matic Validator', 'MV')
@@ -215,28 +216,24 @@ module.exports = async function(deployer, network, accounts) {
       ).encodeABI())
     }
 
-    try {
-      const stakeManager = await deployer.deploy(StakeManager)
-      const stakeMangerProxy = await deployer.deploy(StakeManagerProxy, ZeroAddress)
-      const auctionImpl = await deployer.deploy(StakeManagerExtension)
-      await stakeMangerProxy.updateAndCall(
-        StakeManager.address,
-        stakeManager.contract.methods.initialize(
-          Registry.address,
-          RootChainProxy.address,
-          boneToken.address,
-          testToken.address,
-          StakingNFT.address,
-          StakingInfo.address,
-          ValidatorShareFactory.address,
-          GovernanceProxy.address,
-          accounts[0],
-          auctionImpl.address
-        ).encodeABI()
-      )
-    } catch (error){
-      console.log(error)
-    }
+    const stakeManager = await deployer.deploy(StakeManager)
+    const stakeMangerProxy = await deployer.deploy(StakeManagerProxy, ZeroAddress)
+    const auctionImpl = await deployer.deploy(StakeManagerExtension)
+    await stakeMangerProxy.updateAndCall(
+      StakeManager.address,
+      stakeManager.contract.methods.initialize(
+        Registry.address,
+        RootChainProxy.address,
+        boneToken.address,
+        TestToken.address,
+        StakingNFT.address,
+        StakingInfo.address,
+        ValidatorShareFactory.address,
+        GovernanceProxy.address,
+        accounts[0],
+        auctionImpl.address
+      ).encodeABI()
+    )
 
     await deployer.deploy(SlashingManager, Registry.address, StakingInfo.address, process.env.HEIMDALL_ID)
     let stakingNFT = await StakingNFT.deployed()
@@ -300,7 +297,7 @@ module.exports = async function(deployer, network, accounts) {
           TransferWithSigPredicate: TransferWithSigPredicate.address
         },
         tokens: {
-          MaticToken: maticToken.address,
+          BoneToken: BoneToken.address,
           MaticWeth: MaticWeth.address,
           TestToken: TestToken.address,
           RewardsToken: testToken.address,

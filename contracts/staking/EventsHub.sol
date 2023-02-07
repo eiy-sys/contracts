@@ -102,20 +102,25 @@ contract EventsHub is Initializable {
             oldCommissionRate
         );
     }
-
-    event SharesTransfer(
-        uint256 indexed validatorId,
-        address indexed from,
-        address indexed to,
-        uint256 value
+    
+    event _stakeFor(
+        address user,
+        uint256 amount,
+        bool acceptDelegation,
+        bytes memory signerPubkey
     );
 
-    function logSharesTransfer(
-        uint256 validatorId,
-        address from,
-        address to,
-        uint256 value
-    ) public onlyValidatorContract(validatorId) {
-        emit SharesTransfer(validatorId, from, to, value);
+    function log_stakeFor(
+        address user,
+        uint256 amount,
+        bool acceptDelegation,
+        bytes memory signerPubkey
+    ) public onlyStakeManager {
+        emit _stakeFor(
+            user,
+            amount,
+            acceptDelegation,
+            signerPubkey
+        );
     }
 }

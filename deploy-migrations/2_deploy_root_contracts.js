@@ -43,6 +43,7 @@ const ExitNFT = artifacts.require('ExitNFT')
 // tokens
 const MaticWeth = artifacts.require('MaticWETH')
 const TestToken = artifacts.require('TestToken')
+const BoneToken = artifacts.require('BoneToken')
 const RootERC721 = artifacts.require('RootERC721')
 
 const libDeps = [
@@ -151,15 +152,14 @@ module.exports = async function(deployer) {
 
     console.log('deploying tokens...')
     await deployer.deploy(MaticWeth)
-    await deployer.deploy(TestToken, 'MATIC', 'MATIC')
+    await deployer.deploy(BoneToken, 'BONE', 'BONE')
     const testToken = await TestToken.new('Test ERC20', 'TST20')
-    const rewardToken = await TestToken.new('Rewards', 'RWRD')
     await deployer.deploy(RootERC721, 'Test ERC721', 'TST721')
 
     const stakeManager = await deployer.deploy(StakeManager)
     const proxy = await deployer.deploy(StakeManagerProxy, '0x0000000000000000000000000000000000000000')
     try{
-      await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, TestToken.address, rewardToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
+      await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, BoneToken.address, TestToken.address, rewardToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
     }catch (error){
       console.log(error)
     }
@@ -239,9 +239,8 @@ module.exports = async function(deployer) {
         },
         tokens: {
           MaticWeth: MaticWeth.address,
-          MaticToken: TestToken.address,
+          BoneToken: TestToken.address,
           TestToken: testToken.address,
-          RewardsToken: rewardToken.address,
           RootERC721: RootERC721.address
         }
       }
