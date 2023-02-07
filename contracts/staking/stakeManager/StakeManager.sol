@@ -49,6 +49,7 @@ contract StakeManager is
         uint256 validatorIndex;
     }
 
+
     modifier onlyStaker(uint256 validatorId) {
         _assertStaker(validatorId);
         _;
@@ -681,6 +682,7 @@ contract StakeManager is
                 newCommissionRate
             )
         );
+        logger.(validatorId, signer);
     }
 
     function withdrawDelegatorsReward(uint256 validatorId) public onlyDelegation(validatorId) returns (uint256) {
