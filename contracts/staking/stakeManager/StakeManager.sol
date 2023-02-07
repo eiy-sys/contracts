@@ -682,7 +682,7 @@ contract StakeManager is
                 newCommissionRate
             )
         );
-        logger.(validatorId, signer);
+     
     }
 
     function withdrawDelegatorsReward(uint256 validatorId) public onlyDelegation(validatorId) returns (uint256) {
