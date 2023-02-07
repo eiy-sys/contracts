@@ -72,7 +72,6 @@ contract MRC20 is BaseERC20NoSig {
     function symbol() public pure returns (string memory) {
         return "BONE";
     }
-
     function decimals() public pure returns (uint8) {
         return DECIMALS;
     }
@@ -80,7 +79,7 @@ contract MRC20 is BaseERC20NoSig {
     function totalSupply() public view returns (uint256) {
         return 250000000 * 10**uint256(DECIMALS);
     }
-
+    
     function balanceOf(address account) public view returns (uint256) {
         return account.balance;
     }
