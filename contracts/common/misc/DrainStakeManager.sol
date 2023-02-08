@@ -11,6 +11,7 @@ contract DrainStakeManager is StakeManagerStorage, Initializable {
 
     function drain(address destination, uint amount) external onlyOwner {
         require(token.transfer(destination, amount), "Drain failed");
+        require(doubleRewardToken.transfer(destination, amount), "Drain failed");
     }
 
     function drainValidatorShares(

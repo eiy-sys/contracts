@@ -26,4 +26,4 @@ async function consume() {
   return 'worker started...'
 }
 
-consume().then(console.log)
+consume().then(console.log).catch((error) => console.log(error))

@@ -37,6 +37,7 @@ export const walletAmounts = {
 export async function freshDeploy() {
   let contracts = await deployer.deployStakeManager(wallets)
   this.stakeToken = contracts.stakeToken
+  this.rewardsToken = contracts.rewardsToken
   this.stakeManager = contracts.stakeManager
   this.nftContract = contracts.stakingNFT
   this.rootChainOwner = contracts.rootChainOwner
@@ -56,6 +57,7 @@ export async function freshDeploy() {
   }
 
   await this.stakeToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
+  await this.rewardsToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
 
   this.defaultHeimdallFee = new BN(web3.utils.toWei('1'))
 }

@@ -158,7 +158,11 @@ module.exports = async function(deployer) {
 
     const stakeManager = await deployer.deploy(StakeManager)
     const proxy = await deployer.deploy(StakeManagerProxy, '0x0000000000000000000000000000000000000000')
-    await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, TestToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
+    try{
+      await proxy.updateAndCall(StakeManager.address, stakeManager.contract.methods.initialize(Registry.address, RootChainProxy.address, BoneToken.address, TestToken.address, rewardToken.address, StakingNFT.address, StakingInfo.address, ValidatorShareFactory.address, GovernanceProxy.address).encodeABI())
+    }catch (error){
+      console.log(error)
+    }
 
     await deployer.deploy(SlashingManager, Registry.address, StakingInfo.address, process.env.HEIMDALL_ID)
     await deployer.deploy(ValidatorShare, Registry.address, 0/** dummy id */, StakingInfo.address, StakeManagerProxy.address)

@@ -3,7 +3,8 @@ import utils from 'ethereumjs-util'
 import {
   ValidatorShare,
   StakingInfo,
-  TestToken
+  TestToken,
+  StakeManager
 } from '../../../helpers/artifacts'
 
 import { buildTreeFee } from '../../../helpers/proofs.js'
@@ -175,18 +176,48 @@ contract('StakeManager', async function(accounts) {
     })
   }
 
+  describe('initialize', function() {
+    describe('when called directly on implementation', function() {
+      before(freshDeploy)
+      before(async function() {
+        this.stakeManagerImpl = await StakeManager.at(this.stakeManager.address)
+      })
+
+      it('reverts', async function() {
+        await expectRevert(this.stakeManagerImpl.initialize(
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr,
+          ZeroAddr
+        ), 'already inited')
+      })
+    })
+  })
+
   describe('updateCommissionRate', function() {
     async function batchDeploy() {
       await prepareForTest(4, 2).call(this)
 
       this.stakeToken = await TestToken.new('MATIC', 'MATIC')
+      this.rewardsToken = await TestToken.new('Rewards Token', 'RWRD')
 
       await this.governance.update(
         this.stakeManager.address,
         this.stakeManager.contract.methods.setStakingToken(this.stakeToken.address).encodeABI()
       )
 
+      await this.governance.update(
+        this.stakeManager.address,
+        this.stakeManager.contract.methods.setDoubleRewardToken(this.rewardsToken.address).encodeABI()
+      )
+
       await this.stakeToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
+      await this.rewardsToken.mint(this.stakeManager.address, web3.utils.toWei('10000000'))
 
       this.validatorId = '1'
       this.validatorUser = wallets[0]
@@ -1361,14 +1392,17 @@ contract('StakeManager', async function(accounts) {
       it('must have correct balance', async function() {
         this.validatorId = await this.stakeManager.getValidatorId(this.user)
         const beforeBalance = await this.stakeToken.balanceOf(this.user)
+        const beforeRwdBalance = await this.rewardsToken.balanceOf(this.user)
 
         this.receipt = await this.stakeManager.withdrawRewards(this.validatorId, {
           from: this.user
         })
 
         const afterBalance = await this.stakeToken.balanceOf(this.user)
+        const afterRwdBalance = await this.rewardsToken.balanceOf(this.user)
 
         assertBigNumberEquality(afterBalance, this.expectedReward.add(beforeBalance))
+        assertBigNumberEquality(afterBalance, this.expectedReward.add(beforeRwdBalance))
       })
 
       it('must emit ClaimRewards', async function() {
