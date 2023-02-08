@@ -2,6 +2,7 @@ pragma solidity ^0.5.11;
 
 import "./BaseERC20.sol";
 
+
 /**
  * @title Bone token contract
  * @notice This contract is an ECR20 like wrapper over native ether (bone token) transfers on the shibarium chain
@@ -72,7 +73,6 @@ contract MRC20 is BaseERC20 {
     function symbol() public pure returns (string memory) {
         return "BONE";
     }
-
     function decimals() public pure returns (uint8) {
         return DECIMALS;
     }
@@ -80,7 +80,7 @@ contract MRC20 is BaseERC20 {
     function totalSupply() public view returns (uint256) {
         return 250000000 * 10**uint256(DECIMALS);
     }
-
+    
     function balanceOf(address account) public view returns (uint256) {
         return account.balance;
     }

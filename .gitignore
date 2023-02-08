@@ -24,5 +24,7 @@ test-blockchain/data
 .idea
 
 coverage/
+.vscode
+.idea
 
 coverage.json
