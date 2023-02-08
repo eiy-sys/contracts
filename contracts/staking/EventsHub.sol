@@ -102,4 +102,25 @@ contract EventsHub is Initializable {
             oldCommissionRate
         );
     }
+    
+    event _stakeFor(
+        address user,
+        uint256 amount,
+        bool acceptDelegation,
+        bytes memory signerPubkey
+    );
+
+    function log_stakeFor(
+        address user,
+        uint256 amount,
+        bool acceptDelegation,
+        bytes memory signerPubkey
+    ) public onlyStakeManager {
+        emit _stakeFor(
+            user,
+            amount,
+            acceptDelegation,
+            signerPubkey
+        );
+    }
 }

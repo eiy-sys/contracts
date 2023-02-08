@@ -2,6 +2,8 @@ pragma solidity ^0.5.11;
 
 import "./BaseERC20.sol";
 
+
+/**
  * @title Bone token contract
  * @notice This contract is an ECR20 like wrapper over native ether (bone token) transfers on the shibarium chain
  * @dev ERC20 methods have been made payable while keeping their method signature same as other ChildERC20s on shibarium
