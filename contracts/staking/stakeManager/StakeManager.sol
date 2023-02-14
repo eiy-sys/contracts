@@ -213,7 +213,7 @@ contract StakeManager is
     }
 
     function setDoubleRewardToken(address _token) public onlyGovernance {
-        require(_token != address(0x0), ‘Invalid Address’);
+        require(_token != address(0x0));
         doubleRewardToken = IERC20(_token);
     }
 
